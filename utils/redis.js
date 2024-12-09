@@ -9,17 +9,28 @@ class RedisClient {
             }
         });
 
-        redisClient.on('error', (error) => {
+        this.redisClient.on('error', (error) => {
             console.log(error);
         })
 
-        redisClient.connect()
-    };
+        this.connect()
+    }
 
-    async isAlive() {
-        const response = await this.redisClient.ping();
+    async connect() {
+        try {
+            await this.redisClient.connect();
+            console.log('Connected to Redis successfully');
+        } catch (error) {
+            console.error('Error connecting to Redis:', error);
+        }
+    }
 
-        return response === 'PONG';
+    isAlive() {
+        try {
+            return this.redisClient.isOpen;
+        } catch (error) {
+            return false;
+        }
     };
 
     async get(key) {
@@ -34,12 +45,12 @@ class RedisClient {
     async set(key, value, duration) {
         try {
             await this.redisClient.set(key, value, { EX: duration });
-        } catch {
+        } catch (error) {
             console.error(`Error setting key "${key}": ${err}`);
         }
     };
 
-    async del(key){
+    async del(key) {
         try {
             await this.redisClient.del(key);
         } catch {
