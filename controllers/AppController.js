@@ -5,12 +5,12 @@ class AppController {
     static getStatus(request, response) {
         const redis = redisClient.isAlive();
         const db = dbClient.isAlive();
-        response.status(200).send({ "redis": redis, "db": db });
+        response.status(200).json({ "redis": redis, "db": db });
     }
 
     static getStats(request, response) {
         const users = dbClient.nbUsers();
         const files = dbClient.nbFiles();
-        response.status(200).send({ "users": users, "files": files })
+        response.status(200).json({ "users": users, "files": files })
     }
 }
