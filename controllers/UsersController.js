@@ -6,13 +6,11 @@ class UsersController {
         const { email, password } = req.body;
 
         if (!email) {
-            res.status(400).json({ error: 'Missing email' });
-            return;
+            return res.status(400).json({ error: 'Missing email' });
         }
 
         if (!password) {
-            res.status(400).json({ error: 'Missing password' });
-            return;
+            return res.status(400).json({ error: 'Missing password' });
         }
 
         try {
@@ -20,8 +18,7 @@ class UsersController {
 
             const existingUser = await usersCollection.findOne({ email });
             if (existingUser) {
-                res.status(400).json({ error: 'Already exist' });
-                return;
+                return res.status(400).json({ error: 'Already exist' });
             }
 
             const hashedPassword = crypto.createHash('sha1').update(password).digest('hex');
@@ -37,7 +34,35 @@ class UsersController {
             });
         } catch (err) {
             console.error('Error:', err);
-            res.status(500).json({ error: 'Internal server error' });
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+
+    static async getMe(req, res) {
+        const token = req.headers['X-token'];
+
+        if (!token) {
+            return res.status(401).json({error: 'Unauthorized'});
+        }
+
+        try {
+            const key = `auth_${token}`;
+
+            const userId = await redisClient.get(key);
+            if (!userId) {
+                return res.status(401).json({ error: 'Unauthorized' });
+            }
+
+            const user = await dbClient.nbUsers();
+
+            if (!user) {
+                return res.status(401).json({ error: 'Unauthorized' });
+            }
+
+            return res.status(200).json({ id: user._id.toString() });
+        } catch (err) {
+            console.error('Error in getMe:', error);
+            return res.status(500).json({ error: 'Internal server error' });
         }
     }
 }

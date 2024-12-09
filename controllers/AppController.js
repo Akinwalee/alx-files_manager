@@ -14,3 +14,5 @@ class AppController {
         response.status(200).json({ "users": users, "files": files })
     }
 }
+
+export default AppController;
